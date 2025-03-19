@@ -31,6 +31,8 @@ class _BlaLocationPickerState extends State<BlaLocationPicker> {
     if (widget.initLocation != null) {
       String city = widget.initLocation!.name;
       filteredLocations = LocationsService.instance.getLocationsFor(city);
+    } else {
+      filteredLocations = LocationsService.instance.getLocations();
     }
   }
 
@@ -45,7 +47,9 @@ class _BlaLocationPickerState extends State<BlaLocationPicker> {
   void onSearchChanged(String searchText) {
     List<Location> newSelection = [];
 
-    if (searchText.length > 1) {
+    if (searchText.isEmpty) {
+      newSelection = LocationsService.instance.getLocations();
+    } else if (searchText.length > 1) {
       // We start to search from 2 characters only.
       newSelection = LocationsService.instance.getLocationsFor(searchText);
     }
@@ -65,6 +69,7 @@ class _BlaLocationPickerState extends State<BlaLocationPicker> {
         children: [
           // Top search Search bar
           BlaSearchBar(
+            initLocation: widget.initLocation,
             onBackPressed: onBackSelected,
             onSearchChanged: onSearchChanged,
           ),
@@ -121,10 +126,14 @@ class LocationTile extends StatelessWidget {
 ///
 class BlaSearchBar extends StatefulWidget {
   const BlaSearchBar(
-      {super.key, required this.onSearchChanged, required this.onBackPressed});
+      {super.key,
+      required this.onSearchChanged,
+      required this.onBackPressed,
+      this.initLocation});
 
   final Function(String text) onSearchChanged;
   final VoidCallback onBackPressed;
+  final Location? initLocation;
 
   @override
   State<BlaSearchBar> createState() => _BlaSearchBarState();
@@ -142,6 +151,12 @@ class _BlaSearchBarState extends State<BlaSearchBar> {
 
     // 2 - Update the cross icon
     setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.text = widget.initLocation?.name ?? "";
   }
 
   @override
@@ -179,9 +194,10 @@ class _BlaSearchBarState extends State<BlaSearchBar> {
               focusNode: _focusNode, // Keep focus
               onChanged: onChanged,
               controller: _controller,
-              style: TextStyle(color: BlaColors.textLight),
+              style: TextStyle(color: BlaColors.textNormal),
               decoration: InputDecoration(
                 hintText: "Any city, street...",
+                hintStyle: TextStyle(color: BlaColors.textLight),
                 border: InputBorder.none, // No border
                 filled: false, // No background fill
               ),
