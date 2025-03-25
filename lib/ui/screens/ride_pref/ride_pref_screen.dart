@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../model/ride/ride_pref.dart';
-import '../../../service/ride_prefs_service.dart';
 import '../../theme/theme.dart';
 
 import '../../../utils/animations_util.dart';
@@ -10,6 +9,7 @@ import '../rides/rides_screen.dart';
 import 'widgets/ride_pref_form.dart';
 import 'widgets/ride_pref_history_tile.dart';
 import '../../../provider/ride_pref_provider.dart';
+import '../../../provider/async_value.dart';
 
 const String blablaHomeImagePath = 'assets/images/blabla_home.png';
 
@@ -23,7 +23,8 @@ class RidePrefScreen extends StatelessWidget {
 
   onRidePrefSelected(RidePreference newPreference, BuildContext context) async {
     // 1 - Update the current preference
-    RidePrefService.instance.setCurrentPreference(newPreference);
+    final provider = context.watch<RidesPreferencesProvider>();
+    provider.setCurrentPreference(newPreference);
 
     // 2 - Navigate to the rides screen (with a buttom to top animation)
     await Navigator.of(context)
@@ -68,16 +69,8 @@ class RidePrefScreen extends StatelessWidget {
                   // 2.2 Optionally display a list of past preferences
                   SizedBox(
                     height: 200, // Set a fixed height
-                    child: ListView.builder(
-                      shrinkWrap: true, // Fix ListView height issue
-                      physics: AlwaysScrollableScrollPhysics(),
-                      itemCount: provider.preferencesHistory.length,
-                      itemBuilder: (ctx, index) => RidePrefHistoryTile(
-                        ridePref: provider.preferencesHistory[index],
-                        onPressed: () => onRidePrefSelected(
-                            provider.preferencesHistory[index], context),
-                      ),
-                    ),
+
+                    child: _buildPastPreferences(provider),
                   ),
                 ],
               ),
@@ -86,6 +79,31 @@ class RidePrefScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildPastPreferences(RidesPreferencesProvider provider) {
+    final pastPreferences = provider.preferencesHistory;
+
+    switch (pastPreferences.state) {
+      case AsyncValueState.loading:
+        return const Center(child: CircularProgressIndicator());
+
+      case AsyncValueState.empty:
+        return const Text('No past preferences');
+
+      case AsyncValueState.error:
+        return const Center(child: Text('Error loading past preferences'));
+
+      case AsyncValueState.success:
+        return ListView.builder(
+          physics: AlwaysScrollableScrollPhysics(),
+          itemCount: pastPreferences.data!.length,
+          itemBuilder: (ctx, index) => RidePrefHistoryTile(
+            ridePref: pastPreferences.data![index],
+            onPressed: () => {},
+          ),
+        );
+    }
   }
 }
 
