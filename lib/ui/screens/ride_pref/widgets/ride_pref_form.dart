@@ -8,6 +8,10 @@ import '../../../widgets/actions/bla_button.dart';
 import '../../../widgets/display/bla_divider.dart';
 import 'ride_pref_input_tile.dart';
 import '../../../provider/ride_pref_provider.dart';
+import '../../../widgets/inputs/bla_location_picker.dart';
+import '../../../../utils/animations_util.dart';
+import '../../../../model/location/locations.dart';
+import '../../../screens/rides/rides_screen.dart';
 
 ///
 /// A Ride Preference From is a view to select:
@@ -18,40 +22,80 @@ import '../../../provider/ride_pref_provider.dart';
 ///
 /// The form can be created with an existing RidePref (optional).
 ///
-class RidePrefForm extends StatelessWidget {
-  const RidePrefForm({
-    super.key,
-    required this.onSubmit,
-  });
+class RidePrefForm extends StatefulWidget {
+  @override
+  State<RidePrefForm> createState() => _RidePrefFormState();
+}
 
-  final Function(RidePreference preference) onSubmit;
+class _RidePrefFormState extends State<RidePrefForm> {
+  // Local form state
+  Location? _departure;
+  Location? _arrival;
+  DateTime _departureDate = DateTime.now();
+  int _requestedSeats = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with provider values if they exist
+    final prefProvider = context.read<RidesPreferencesProvider>();
+    if (prefProvider.currentPreference != null) {
+      _departure = prefProvider.currentPreference!.departure;
+      _arrival = prefProvider.currentPreference!.arrival;
+      _departureDate = prefProvider.currentPreference!.departureDate;
+      _requestedSeats = prefProvider.currentPreference!.requestedSeats;
+    }
+  }
+
+  void onDeparturePressed() async {
+    // Just update local state for the form
+    final selectedLocation = await Navigator.of(context).push<Location>(
+      AnimationUtils.createBottomToTopRoute(
+        BlaLocationPicker(initLocation: _departure),
+      ),
+    );
+
+    if (selectedLocation != null) {
+      setState(() {
+        _departure = selectedLocation;
+      });
+    }
+  }
+
+  void onArrivalPressed() async {
+    // Just update local state for the form
+    final selectedLocation = await Navigator.of(context).push<Location>(
+      AnimationUtils.createBottomToTopRoute(
+        BlaLocationPicker(initLocation: _arrival),
+      ),
+    );
+
+    if (selectedLocation != null) {
+      setState(() {
+        _arrival = selectedLocation;
+      });
+    }
+  }
+
+  void onSearch() {
+    // Only create RidePreference and update provider when actually searching
+    if (_departure != null && _arrival != null) {
+      final newPreference = RidePreference(
+        departure: _departure!,
+        arrival: _arrival!,
+        departureDate: _departureDate,
+        requestedSeats: _requestedSeats,
+      );
+      Navigator.of(context).push<RidePreference>(
+          AnimationUtils.createBottomToTopRoute(RidesScreen()));
+      context
+          .read<RidesPreferencesProvider>()
+          .setCurrentPreference(newPreference);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Get access to the provider
-    final prefProvider = context.watch<RidesPreferencesProvider>();
-
-    // Get current values from provider instead of local state
-    final departure = prefProvider.currentPreference?.departure;
-    final arrival = prefProvider.currentPreference?.arrival;
-    final departureDate =
-        prefProvider.currentPreference?.departureDate ?? DateTime.now();
-    final requestedSeats = prefProvider.currentPreference?.requestedSeats ?? 1;
-
-    void onSubmit() {
-      if (departure != null && arrival != null) {
-        final newPreference = RidePreference(
-          departure: departure,
-          departureDate: departureDate,
-          arrival: arrival,
-          requestedSeats: requestedSeats,
-        );
-
-        // Update the provider instead of using local callback
-        prefProvider.setCurrentPreference(newPreference);
-      }
-    }
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,33 +106,32 @@ class RidePrefForm extends StatelessWidget {
             children: [
               // 1 - Input the ride departure
               RidePrefInputTile(
-                isPlaceHolder: departure == null,
-                title: departure != null ? departure.name : "Leaving from",
+                isPlaceHolder: _departure == null,
+                title: _departure != null ? _departure!.name : "Leaving from",
                 leftIcon: Icons.location_on,
-                onPressed: () => {},
+                onPressed: onDeparturePressed,
               ),
               const BlaDivider(),
 
               // 2 - Input the ride arrival
               RidePrefInputTile(
-                isPlaceHolder: arrival == null,
-                title: arrival != null ? arrival.name : "Going to",
+                isPlaceHolder: _arrival == null,
+                title: _arrival != null ? _arrival!.name : "Going to",
                 leftIcon: Icons.location_on,
-                onPressed: () => {},
+                onPressed: onArrivalPressed,
               ),
               const BlaDivider(),
 
               // 3 - Input the ride date
               RidePrefInputTile(
-                title: DateTimeUtils.formatDateTime(departureDate),
-                leftIcon: Icons.calendar_month,
-                onPressed: () => {},
-              ),
+                  title: DateTimeUtils.formatDateTime(_departureDate),
+                  leftIcon: Icons.calendar_month,
+                  onPressed: () => {}),
               const BlaDivider(),
 
               // 4 - Input the requested number of seats
               RidePrefInputTile(
-                title: requestedSeats.toString(),
+                title: _requestedSeats.toString(),
                 leftIcon: Icons.person_2_outlined,
                 onPressed: () => {},
               ),
@@ -97,7 +140,7 @@ class RidePrefForm extends StatelessWidget {
         ),
 
         // 5 - Launch a search
-        BlaButton(text: 'Search', onPressed: onSubmit),
+        BlaButton(text: 'Search', onPressed: onSearch),
       ],
     );
   }

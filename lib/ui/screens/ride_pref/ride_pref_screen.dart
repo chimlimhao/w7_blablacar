@@ -21,13 +21,13 @@ const String blablaHomeImagePath = 'assets/images/blabla_home.png';
 class RidePrefScreen extends StatelessWidget {
   const RidePrefScreen({super.key});
 
-  onRidePrefSelected(RidePreference newPreference, BuildContext context) async {
+  onRidePrefSelected(RidePreference newPreference, BuildContext context) {
     // 1 - Update the current preference
-    final provider = context.watch<RidesPreferencesProvider>();
+    final provider = context.read<RidesPreferencesProvider>();
     provider.setCurrentPreference(newPreference);
 
     // 2 - Navigate to the rides screen (with a buttom to top animation)
-    await Navigator.of(context)
+    Navigator.of(context)
         .push(AnimationUtils.createBottomToTopRoute(RidesScreen()));
   }
 
@@ -61,9 +61,7 @@ class RidePrefScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // 2.1 Display the Form to input the ride preferences
-                  RidePrefForm(
-                      onSubmit: (newPreference) =>
-                          onRidePrefSelected(newPreference, context)),
+                  RidePrefForm(),
                   SizedBox(height: BlaSpacings.m),
 
                   // 2.2 Optionally display a list of past preferences
@@ -89,10 +87,21 @@ class RidePrefScreen extends StatelessWidget {
         return const Center(child: CircularProgressIndicator());
 
       case AsyncValueState.empty:
-        return const Text('No past preferences');
+        return const Center(child: Text('No past preferences'));
 
       case AsyncValueState.error:
-        return const Center(child: Text('Error loading past preferences'));
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Error loading past preferences'),
+              ElevatedButton(
+                onPressed: () => provider.fetchPastPreferences(),
+                child: Text('Retry'),
+              ),
+            ],
+          ),
+        );
 
       case AsyncValueState.success:
         return ListView.builder(
@@ -100,7 +109,8 @@ class RidePrefScreen extends StatelessWidget {
           itemCount: pastPreferences.data!.length,
           itemBuilder: (ctx, index) => RidePrefHistoryTile(
             ridePref: pastPreferences.data![index],
-            onPressed: () => {},
+            onPressed: () =>
+                onRidePrefSelected(pastPreferences.data![index], ctx),
           ),
         );
     }
