@@ -23,6 +23,8 @@ import '../../../screens/rides/rides_screen.dart';
 /// The form can be created with an existing RidePref (optional).
 ///
 class RidePrefForm extends StatefulWidget {
+  const RidePrefForm({super.key});
+
   @override
   State<RidePrefForm> createState() => _RidePrefFormState();
 }
