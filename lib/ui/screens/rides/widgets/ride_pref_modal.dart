@@ -50,7 +50,6 @@ class _RidePrefModalState extends State<RidePrefModal> {
               child: Padding(
                 padding: const EdgeInsets.all(10),
                 child: RidePrefForm(
-                  initialPreference: widget.initialPreference,
                   onSubmit: onSubmit,
                 ),
               ),

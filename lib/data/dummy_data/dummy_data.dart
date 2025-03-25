@@ -1,7 +1,7 @@
-import '../model/location/locations.dart';
-import '../model/ride/ride.dart';
-import '../model/ride/ride_pref.dart';
-import '../model/user/user.dart';
+import '../../model/location/locations.dart';
+import '../../model/ride/ride.dart';
+import '../../model/ride/ride_pref.dart';
+import '../../model/user/user.dart';
 import 'dart:math';
 
 final Random random = Random();
@@ -60,19 +60,19 @@ List<RidePreference> fakeRidePrefs = [
   RidePreference(
     departure: fakeLocations[0], // London
     departureDate: DateTime.now().add(Duration(days: 1)), // Tomorrow
-    arrival: fakeLocations[3], // Paris
+    arrival: fakeLocations[3], // Liverpool
     requestedSeats: 2,
   ),
   RidePreference(
     departure: fakeLocations[1], // Manchester
     departureDate: DateTime.now().add(Duration(days: 7)), // Next week
-    arrival: fakeLocations[4], // Lyon
+    arrival: fakeLocations[4], // Leeds
     requestedSeats: 3,
   ),
   RidePreference(
     departure: fakeLocations[2], // Birmingham
     departureDate: DateTime.now(), // Today
-    arrival: fakeLocations[5], // Marseille
+    arrival: fakeLocations[5], // Glasgow
     requestedSeats: 1,
   ),
   RidePreference(

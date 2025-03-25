@@ -8,8 +8,8 @@ import '../../../utils/animations_util.dart';
 import '../rides/rides_screen.dart';
 import 'widgets/ride_pref_form.dart';
 import 'widgets/ride_pref_history_tile.dart';
-import '../../../provider/ride_pref_provider.dart';
-import '../../../provider/async_value.dart';
+import '../../provider/ride_pref_provider.dart';
+import '../../provider/async_value.dart';
 
 const String blablaHomeImagePath = 'assets/images/blabla_home.png';
 

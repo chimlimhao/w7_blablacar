@@ -7,7 +7,7 @@ import '../../../../utils/date_time_util.dart';
 import '../../../widgets/actions/bla_button.dart';
 import '../../../widgets/display/bla_divider.dart';
 import 'ride_pref_input_tile.dart';
-import '../../../../provider/ride_pref_provider.dart';
+import '../../../provider/ride_pref_provider.dart';
 
 ///
 /// A Ride Preference From is a view to select:

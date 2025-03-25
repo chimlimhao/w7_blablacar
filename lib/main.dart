@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'repository/mock/mock_ride_preferences_repository.dart';
+import 'data/repository/mock/mock_ride_preferences_repository.dart';
 import 'ui/screens/ride_pref/ride_pref_screen.dart';
 import 'ui/theme/theme.dart';
 import 'package:provider/provider.dart';
-import 'provider/ride_pref_provider.dart';
+import 'ui/provider/ride_pref_provider.dart';
 
 void main() {
   runApp(
