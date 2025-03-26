@@ -9,7 +9,10 @@ import '../rides/rides_screen.dart';
 import 'widgets/ride_pref_form.dart';
 import 'widgets/ride_pref_history_tile.dart';
 import '../../provider/ride_pref_provider.dart';
+import '../../../ui/screens/error/bla_error_screen.dart';
+
 import '../../provider/async_value.dart';
+import '../../../ui/widgets/actions/bla_button.dart';
 
 const String blablaHomeImagePath = 'assets/images/blabla_home.png';
 
@@ -45,9 +48,24 @@ class RidePrefScreen extends StatelessWidget {
         Column(
           children: [
             SizedBox(height: BlaSpacings.m),
-            Text(
-              "Your pick of rides at low price",
-              style: BlaTextStyles.heading.copyWith(color: Colors.white),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    "Your pick of rides at low price",
+                    style: BlaTextStyles.heading.copyWith(color: Colors.white),
+                  ),
+                ),
+
+                // Developer menu for Firebase operations
+                IconButton(
+                  icon: Icon(Icons.developer_mode, color: Colors.white),
+                  onPressed: () {
+                    _showDeveloperMenu(context);
+                  },
+                ),
+              ],
             ),
             SizedBox(height: 100),
             Container(
@@ -61,12 +79,12 @@ class RidePrefScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // 2.1 Display the Form to input the ride preferences
-                  RidePrefForm(),
+                  RidePrefForm(initialPreference: provider.currentPreference),
                   SizedBox(height: BlaSpacings.m),
 
                   // 2.2 Optionally display a list of past preferences
                   SizedBox(
-                    height: 200, // Set a fixed height
+                    height: 350, // Set a fixed height
 
                     child: _buildPastPreferences(provider),
                   ),
@@ -90,16 +108,22 @@ class RidePrefScreen extends StatelessWidget {
         return const Center(child: Text('No past preferences'));
 
       case AsyncValueState.error:
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Error loading past preferences'),
-              ElevatedButton(
-                onPressed: () => provider.fetchPastPreferences(),
-                child: Text('Retry'),
-              ),
-            ],
+        return SizedBox(
+          height: 180,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                BlaError(message: 'Error loading past preferences'),
+                SizedBox(height: 10),
+                BlaButton(
+                  text: 'Retry',
+                  type: ButtonType.primary,
+                  onPressed: () => provider.fetchPastPreferences(),
+                ),
+              ],
+            ),
           ),
         );
 
@@ -114,6 +138,63 @@ class RidePrefScreen extends StatelessWidget {
           ),
         );
     }
+  }
+
+  // Developer menu for Firebase operations
+  void _showDeveloperMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Firebase Developer Options',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 16),
+              ListTile(
+                leading: Icon(Icons.cloud_upload),
+                title: Text('Seed Firebase with sample locations'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  try {
+                    // Show loading indicator
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Seeding Firebase data...'),
+                        duration: Duration(milliseconds: 1000),
+                      ),
+                    );
+
+                    // Show success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Firebase data seeded successfully!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    // Show error message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error seeding Firebase data: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 

@@ -79,6 +79,9 @@ class RidesPreferencesProvider extends ChangeNotifier {
     try {
       final prefs = await localRepository.fetchPastPreferences();
 
+      // Simulate an error for testing purposes
+      // throw Exception("Failed to fetch past preferences");
+
       if (prefs.isEmpty) {
         _pastPreferences = AsyncValue.empty();
       } else {

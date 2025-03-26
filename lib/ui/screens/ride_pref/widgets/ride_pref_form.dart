@@ -23,7 +23,9 @@ import '../../../screens/rides/rides_screen.dart';
 /// The form can be created with an existing RidePref (optional).
 ///
 class RidePrefForm extends StatefulWidget {
-  const RidePrefForm({super.key});
+  const RidePrefForm({super.key, this.initialPreference});
+
+  final RidePreference? initialPreference;
 
   @override
   State<RidePrefForm> createState() => _RidePrefFormState();
@@ -46,6 +48,23 @@ class _RidePrefFormState extends State<RidePrefForm> {
       _arrival = prefProvider.currentPreference!.arrival;
       _departureDate = prefProvider.currentPreference!.departureDate;
       _requestedSeats = prefProvider.currentPreference!.requestedSeats;
+    }
+  }
+
+  @override
+  void didUpdateWidget(RidePrefForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // If the preference passed from parent changed
+    if (widget.initialPreference != oldWidget.initialPreference &&
+        widget.initialPreference != null) {
+      setState(() {
+        // Update local state with new values from initialPreference
+        _departure = widget.initialPreference!.departure;
+        _arrival = widget.initialPreference!.arrival;
+        _departureDate = widget.initialPreference!.departureDate;
+        _requestedSeats = widget.initialPreference!.requestedSeats;
+      });
     }
   }
 
